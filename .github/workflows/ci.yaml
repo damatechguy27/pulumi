@@ -60,7 +60,7 @@ jobs:
       - name: Build, tag, and push image to Amazon ECR
         env:
           ECR_REGISTRY: ${{ steps.ecr.outputs.repository_url }}
-          ECR_REPOSITORY: PulumiECRRepo  # Replace with your ECR repository name
+          ECR_REPOSITORY: pulumi_ecr_repo  # Replace with your ECR repository name
           IMAGE_TAG: ${{ github.sha }}
         run: |
           git clone -b Glokar https://github.com/damatechguy27/dockerfiles.git
