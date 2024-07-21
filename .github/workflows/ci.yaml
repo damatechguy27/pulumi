@@ -62,7 +62,6 @@ jobs:
       PULUMI_STACK: ${{secrets.PULUMI_STACK}}
 
     steps:
-
     - name: Login to Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
