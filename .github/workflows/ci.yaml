@@ -64,7 +64,7 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           git clone -b Glokar https://github.com/damatechguy27/dockerfiles.git
-          cd Glokar
+          cd Glokar/
           docker build -t $ECR_REGISTRY:$IMAGE_TAG .
           docker push $ECR_REGISTRY:$IMAGE_TAG
     
