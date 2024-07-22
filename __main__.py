@@ -1,6 +1,7 @@
 import pulumi
 import pulumi_aws as aws
 import pulumi_eks as eks
+import pulumi_kubernetes as k8s
 #
 #Creating ECR Repo
 #
