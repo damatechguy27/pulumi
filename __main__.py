@@ -48,6 +48,15 @@ cluster = eks.Cluster("pulum-cluster",
     max_size=2,
     desired_capacity=1)
 
+
+# Export the repository URL & Export the cluster's kubeconfig
+pulumi.export('repository_url', repo.repository_url)
+
+pulumi.export("kubeconfig", cluster.kubeconfig)
+
+# Create a Kubernetes provider using the EKS cluster's kubeconfig
+k8s_provider = k8s.Provider('k8s-provider', kubeconfig=cluster.kubeconfig)
+
 #
 # EKS Cluster
 #
@@ -70,6 +79,10 @@ deployment = k8s.apps.v1.Deployment("my-deployment",
         },
     })
 
+
+
+
+
 # Create an EKS node group
 node_group = eks.ManagedNodeGroup("pulum-nodegroup",
     cluster=cluster.core,
@@ -83,6 +96,8 @@ node_group = eks.ManagedNodeGroup("pulum-nodegroup",
     ),
     instance_types=["t3.micro"])
 
+# IAM Role
+pulumi.export("instance_role", cluster.instance_role.arn)
 
 #
 # Load Balancer 
@@ -109,16 +124,8 @@ listener = aws.lb.Listener("my-listener",
     }])
 
 
-# Create a Kubernetes provider using the EKS cluster's kubeconfig
-k8s_provider = k8s.Provider('k8s-provider', kubeconfig=cluster.kubeconfig)
 
-# Export the repository URL & Export the cluster's kubeconfig
-pulumi.export('repository_url', repo.repository_url)
-
-pulumi.export("kubeconfig", cluster.kubeconfig)
 
 # Export the ALB DNS name
 pulumi.export("alb_dns_name", alb.dns_name)
 
-# IAM Role
-pulumi.export("instance_role", cluster.instance_role.arn)
