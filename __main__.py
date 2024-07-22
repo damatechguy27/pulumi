@@ -48,6 +48,28 @@ cluster = eks.Cluster("pulum-cluster",
     max_size=2,
     desired_capacity=1)
 
+#
+# EKS Cluster
+#
+# Deploy the Docker image to the EKS cluster
+app_labels = {"app": "my-app"}
+
+deployment = k8s.apps.v1.Deployment("my-deployment",
+    spec={
+        "selector": {"matchLabels": app_labels},
+        "replicas": 2,
+        "template": {
+            "metadata": {"labels": app_labels},
+            "spec": {
+                "containers": [{
+                    "name": "my-app",
+                    "image": repo.repository_url.apply(lambda url: f"{url}:latest"),
+                    "ports": [{"containerPort": 80}],
+                }],
+            },
+        },
+    })
+
 # Create an EKS node group
 node_group = eks.ManagedNodeGroup("pulum-nodegroup",
     cluster=cluster.core,
@@ -60,6 +82,7 @@ node_group = eks.ManagedNodeGroup("pulum-nodegroup",
         min_size=1
     ),
     instance_types=["t3.micro"])
+
 
 #
 # Load Balancer 
@@ -85,27 +108,6 @@ listener = aws.lb.Listener("my-listener",
         "target_group_arn": target_group.arn
     }])
 
-#
-# EKS Cluster
-#
-# Deploy the Docker image to the EKS cluster
-app_labels = {"app": "my-app"}
-
-deployment = k8s.apps.v1.Deployment("my-deployment",
-    spec={
-        "selector": {"matchLabels": app_labels},
-        "replicas": 2,
-        "template": {
-            "metadata": {"labels": app_labels},
-            "spec": {
-                "containers": [{
-                    "name": "my-app",
-                    "image": repo.repository_url.apply(lambda url: f"{url}:latest"),
-                    "ports": [{"containerPort": 80}],
-                }],
-            },
-        },
-    })
 
 # Create a Kubernetes provider using the EKS cluster's kubeconfig
 k8s_provider = k8s.Provider('k8s-provider', kubeconfig=cluster.kubeconfig)
