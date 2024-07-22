@@ -94,6 +94,7 @@ jobs:
         run: | 
           pip install pulumi
           pip install pulumi pulumi-aws
+          pip install pulumi_eks
           python -m venv venv
           source venv/bin/activate
           pip install -r requirements.txt
