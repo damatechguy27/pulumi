@@ -66,7 +66,7 @@ jobs:
           git clone -b Glokar https://github.com/damatechguy27/dockerfiles.git
           ls -al
           pwd
-          cd Glokar/
+          cd dockerfiles/Glokar/
           docker build -t $ECR_REGISTRY:$IMAGE_TAG .
           docker push $ECR_REGISTRY:$IMAGE_TAG
     
