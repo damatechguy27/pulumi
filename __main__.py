@@ -10,8 +10,6 @@ import pulumi_kubernetes as k8s
 # Create an ECR repository
 repo = aws.ecr.Repository('pulumi_ecr_repo')
 
-# Create a Kubernetes provider using the EKS cluster's kubeconfig
-k8s_provider = k8s.Provider('k8s-provider', kubeconfig=cluster.kubeconfig)
 
 # Create a Docker image
 docker_image = docker.Image("my-dockerimage",
@@ -108,6 +106,8 @@ deployment = k8s.apps.v1.Deployment("my-deployment",
         },
     })
 
+# Create a Kubernetes provider using the EKS cluster's kubeconfig
+k8s_provider = k8s.Provider('k8s-provider', kubeconfig=cluster.kubeconfig)
 
 # Export the repository URL & Export the cluster's kubeconfig
 pulumi.export('repository_url', repo.repository_url)
