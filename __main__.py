@@ -13,10 +13,10 @@ repo = aws.ecr.Repository('pulumi_ecr_repo')
 
 
 # Create a Docker image
-docker_image = docker.Image("my-dockerimage",
-    build="./app", # Path to the directory containing your Dockerfile
-    image_name=repo.repository_url,
-    registry=aws.ecr.GetAuthorizationTokenArgs(registry_id=repo.registry_id))
+#docker_image = docker.Image("my-dockerimage",
+#    build="./app", # Path to the directory containing your Dockerfile
+#    image_name=repo.repository_url,
+#    registry=aws.ecr.GetAuthorizationTokenArgs(registry_id=repo.registry_id))
 #
 #Creating kubernetes Cluster
 #
