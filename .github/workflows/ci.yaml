@@ -25,7 +25,7 @@ jobs:
 
       - name: Install Pulumi SDK
         run: | 
-          pip install pulumi pulumi-aws pulumi_eks
+          pip install pulumi pulumi-aws pulumi_eks pulumi_awsx
           python -m venv venv
           source venv/bin/activate
           pip install -r requirements.txt
@@ -91,7 +91,7 @@ jobs:
 
       - name: Install Pulumi SDK
         run: | 
-          pip install pulumi pulumi-aws pulumi_eks
+          pip install pulumi pulumi-aws pulumi_eks pulumi_awsx
           python -m venv venv
           source venv/bin/activate
           pip install --upgrade pip setuptools wheel

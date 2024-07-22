@@ -1,6 +1,7 @@
 import pulumi
 import pulumi_aws as aws
 import pulumi_eks as eks
+import pulumi_awsx as awsx
 import pulumi_kubernetes as k8s
 #
 #Creating ECR Repo
@@ -116,3 +117,6 @@ pulumi.export("kubeconfig", cluster.kubeconfig)
 
 # Export the ALB DNS name
 pulumi.export("alb_dns_name", alb.dns_name)
+
+# IAM Role
+pulumi.export("instance_role", cluster.instance_role.arn)
