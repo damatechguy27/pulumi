@@ -17,7 +17,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.12'
 
       - name: Install dependencies
         run: |
@@ -25,8 +25,7 @@ jobs:
 
       - name: Install Pulumi SDK
         run: | 
-          pip install pulumi
-          pip install pulumi pulumi-aws
+          pip install pulumi pulumi-aws pulumi_eks
           python -m venv venv
           source venv/bin/activate
           pip install -r requirements.txt
@@ -84,7 +83,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.12'
 
       - name: Install dependencies
         run: |
@@ -92,9 +91,7 @@ jobs:
 
       - name: Install Pulumi SDK
         run: | 
-          pip install pulumi
-          pip install pulumi pulumi-aws
-          pip install pulumi_eks
+          pip install pulumi pulumi-aws pulumi_eks
           python -m venv venv
           source venv/bin/activate
           pip install --upgrade pip setuptools wheel
