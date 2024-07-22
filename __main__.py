@@ -10,81 +10,109 @@ import pulumi_kubernetes as k8s
 # Create an ECR repository
 repo = aws.ecr.Repository('pulumi_ecr_repo')
 
+# Create a Kubernetes provider using the EKS cluster's kubeconfig
+k8s_provider = k8s.Provider('k8s-provider', kubeconfig=cluster.kubeconfig)
+
+# Create a Docker image
+docker_image = docker.Image("my-dockerimage",
+    build="./app", # Path to the directory containing your Dockerfile
+    image_name=repo.repository_url,
+    registry=aws.ecr.GetAuthorizationTokenArgs(registry_id=repo.registry_id))
 #
 #Creating kubernetes Cluster
 #
 
-# Create a VPC for our cluster
-vpc = aws.ec2.Vpc("pulumi-vpc",
+# Create a VPC for the EKS cluster
+vpc = aws.ec2.Vpc("pulum-vpc",
     cidr_block="10.0.0.0/16",
+    enable_dns_support=True,
     enable_dns_hostnames=True,
-    enable_dns_support=True)
+    tags={"Name": "pulum-vpc"})
 
-# Create public subnets
-public_subnet_a = aws.ec2.Subnet("public-subnet-a",
+# Create subnets for the EKS cluster
+subnet1 = aws.ec2.Subnet("subnet-1",
     vpc_id=vpc.id,
     cidr_block="10.0.1.0/24",
-    availability_zone="us-west-2a",
-    map_public_ip_on_launch=True)
+    availability_zone="us-west-2a")
 
-public_subnet_b = aws.ec2.Subnet("public-subnet-b",
+subnet2 = aws.ec2.Subnet("subnet-2",
     vpc_id=vpc.id,
     cidr_block="10.0.2.0/24",
-    availability_zone="us-west-2b",
-    map_public_ip_on_launch=True)
+    availability_zone="us-west-2b")
 
 # Create an EKS cluster
 cluster = eks.Cluster("pulum-cluster",
     vpc_id=vpc.id,
-    public_subnet_ids=[public_subnet_a.id, public_subnet_b.id],
+    subnet_ids=[subnet1.id, subnet2.id],
     instance_type="t3.micro",
-    desired_capacity=2,
     min_size=1,
-    max_size=3)
+    max_size=2,
+    desired_capacity=1)
 
-# Create a node group
-node_group = eks.NodeGroup("pulum-node",
+# Create an EKS node group
+node_group = eks.ManagedNodeGroup("pulum-nodegroup",
     cluster=cluster.core,
-    instance_type="t3.micro",
-    desired_capacity=2,
-    min_size=1,
-    max_size=3,
-    labels={"role": "general"},
-    taints=[{"key": "workload", "value": "general", "effect": "NO_SCHEDULE"}])
+    node_group_name="pulum-nodegroup",
+    node_role_arn=cluster.instance_role_arn,
+    subnet_ids=cluster.subnet_ids,
+    scaling_config=aws.eks.NodeGroupScalingConfigArgs(
+        desired_size=1,
+        max_size=2,
+        min_size=1
+    ),
+    instance_types=["t3.micro"])
 
-# EKS Deployment
-app_labels = { 'app': 'my-app' }
-deployment = k8s.apps.v1.Deployment('my-app-deployment',
+#
+# Load Balancer 
+#
+# Create an Application Load Balancer
+alb = aws.lb.LoadBalancer("my-alb",
+    subnets=[subnet1.id, subnet2.id],
+    security_groups=[cluster.cluster_security_group.id])
+
+# Create a target group for the ALB
+target_group = aws.lb.TargetGroup("my-target-group",
+    vpc_id=vpc.id,
+    port=80,
+    protocol="HTTP",
+    target_type="ip")
+
+# Create a listener for the ALB
+listener = aws.lb.Listener("my-listener",
+    load_balancer_arn=alb.arn,
+    port=80,
+    default_actions=[{
+        "type": "forward",
+        "target_group_arn": target_group.arn
+    }])
+
+#
+# EKS Cluster
+#
+# Deploy the Docker image to the EKS cluster
+app_labels = {"app": "my-app"}
+
+deployment = k8s.apps.v1.Deployment("my-deployment",
     spec={
-        'selector': { 'match_labels': app_labels },
-        'replicas': 1,
-        'template': {
-            'metadata': { 'labels': app_labels },
-            'spec': {
-                'containers': [{
-                    'name': 'my-app',
-                    'image': repo.repository_url.apply(lambda url: f"{url}:latest"),
-                    'ports': [{ 'container_port': 80 }]
-                }]
-            }
-        }
-    },
-    opts=pulumi.ResourceOptions(provider=k8s.Provider('k8s-provider', kubeconfig=cluster.kubeconfig))
-)
-
-
-# EKS Deployment Service 
-service = k8s.core.v1.Service('my-app-service',
-    spec={
-        'selector': app_labels,
-        'ports': [{ 'port': 80, 'target_port': 80 }],
-        'type': 'LoadBalancer'
-    },
-    opts=pulumi.ResourceOptions(provider=k8s.Provider('k8s-provider', kubeconfig=cluster.kubeconfig))
-)
+        "selector": {"matchLabels": app_labels},
+        "replicas": 2,
+        "template": {
+            "metadata": {"labels": app_labels},
+            "spec": {
+                "containers": [{
+                    "name": "my-app",
+                    "image": repo.repository_url.apply(lambda url: f"{url}:latest"),
+                    "ports": [{"containerPort": 80}],
+                }],
+            },
+        },
+    })
 
 
 # Export the repository URL & Export the cluster's kubeconfig
 pulumi.export('repository_url', repo.repository_url)
 
 pulumi.export("kubeconfig", cluster.kubeconfig)
+
+# Export the ALB DNS name
+pulumi.export("alb_dns_name", alb.dns_name)
