@@ -4,6 +4,10 @@ import pulumi_eks as eks
 import pulumi_kubernetes as k8s
 import json
 
+# Example
+# https://github.com/sublee/pulumi-eks/blob/75a6804fbc67dd7a5662664c6063a4c44d69b5ec/examples/nodegroup-py/__main__.py#L66
+# https://www.youtube.com/watch?v=gxLyAr0lUg0
+#
 class newcluster(pulumi.ComponentResource):
     def __init__(self, name:str):
         super().__init__('custom:resource:newcluster', name)
