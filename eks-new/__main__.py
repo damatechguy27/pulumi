@@ -5,7 +5,7 @@ import pulumi_kubernetes as k8s
 import json
 from os.path import join
 from eks import newcluster
-from ingress_controller import IngressController
+from ingress_controller import IngressController_nginx_clb,IngressController_nginx_nlb ,IngressController_aws_alb
 #import nginx
 
 
@@ -17,9 +17,11 @@ cluster1 = newcluster(
     "cluster1"
 )
 
-nginx = IngressController("ingress",cluster1)
+#nginx = IngressController_nginx_clb("ingress",cluster1)
 
+#nginx = IngressController_nginx_nlb("ingress",cluster1)
 
+#alb_ingress = IngressController_aws_alb("ingress",cluster1)
 
 #nginx_deploy(cluster1.cluster_provider)
 

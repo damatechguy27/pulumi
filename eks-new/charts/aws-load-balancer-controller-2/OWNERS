@@ -1,0 +1,21 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+# This OWNERS file should stay in sync:
+# https://github.com/kubernetes/test-infra/blob/master/config/jobs/kubernetes-sigs/aws-load-balancer-controller/OWNERS
+
+approvers:
+- M00nF1sh
+- oliviassss
+- shraddhabang
+- wweiwei-li
+- zac-nixon
+reviewers:
+- M00nF1sh
+- oliviassss
+- shraddhabang
+- wweiwei-li
+- zac-nixon
+emeritus_approvers:
+- bigkraig
+- alejandrox1
+- johngmyers
